@@ -2,7 +2,7 @@ import { defineCosenseSite } from "@cosense-site-kit/core";
 
 // This repo deploys ITSELF as a live demo, built from the public Cosense
 // project https://scrapbox.io/cosense-site-starter/ and served at
-// https://shinyaoguri.github.io/cosense-site-starter/.
+// https://shinyaoguri.github.io/cosense-theme-default/.
 //
 // After cloning, point it at YOUR site by editing these fields:
 //   1. source.project — your PUBLIC Cosense project name.
@@ -11,10 +11,10 @@ import { defineCosenseSite } from "@cosense-site-kit/core";
 //   (site.title / description are the demo's; change them too.)
 export default defineCosenseSite({
   site: {
-    title: "cosense-site-starter",
-    description: "Live demo of the cosense-site-kit starter template",
+    title: "cosense-theme-default",
+    description: "Live demo of the cosense-site-kit default theme",
     baseUrl: "https://shinyaoguri.github.io",
-    base: "/cosense-site-starter",
+    base: "/cosense-theme-default",
     lang: "ja",
   },
 

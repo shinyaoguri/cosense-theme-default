@@ -1,4 +1,4 @@
-# cosense-site-starter
+# cosense-theme-default
 
 公開 Cosense プロジェクトを静的サイトに変換する [cosense-site-kit](https://github.com/shinyaoguri/cosense-site-kit) のスターターテンプレートです。ビルドとデプロイは GitHub Actions が行うため、**ローカル環境なしでブラウザだけ**で立ち上げられます。
 
