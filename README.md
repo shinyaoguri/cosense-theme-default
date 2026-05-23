@@ -105,6 +105,41 @@ code:site.yaml
 
 ---
 
+## カラーテーマ（スキン）
+
+デフォルトテーマは配色スキンの切り替えに対応しています。組み込みスキンは次の2つ:
+
+| スキン | 説明 |
+|---|---|
+| `light` | 既定。明るい配色 |
+| `dark` | Notion 風の暖色を保ったダーク配色 |
+
+切り替え方は2通り。**`.site` の指定が最優先**です。
+
+1. **Cosense の `.site` から**（ブラウザだけ・再ビルド不要・**おすすめ**）— `code:site.yaml` に `theme.skin` を足すだけ。運用者がコードを触らず色を変えられます。
+
+   ```
+   code:site.yaml
+    theme:
+      skin: dark
+   ```
+
+2. **`astro.config.ts` から**（ビルド時の既定）— `themeDefault({ preset: presetDark })`。独自配色にしたいときは CSS 変数を上書きします:
+
+   ```ts
+   import themeDefault, { presetDark } from "@cosense-site-kit/theme-default";
+   // ...
+   themeDefault({
+     preset: presetDark,
+     // 独自配色の例（light をベースに CSS 変数を上書き）:
+     // preset: { tokens: { "--color-bg": "#191919", "--color-text": "#e6e6e3" }, colorScheme: "dark" },
+   })
+   ```
+
+`light` / `dark` 以外の名前付きスキンを `.site` から選べるようにするには、テーマ本体の `PRESETS` レジストリに追加します（詳しくは [cosense-site-kit のドキュメント](https://github.com/shinyaoguri/cosense-site-kit)）。
+
+---
+
 ## B. ローカルで開発する（任意）
 
 見た目を確認しながら調整したいときや、公開前に手元でビルドを通したいときに使います。**「A.」で公開できていれば必須ではありません。**

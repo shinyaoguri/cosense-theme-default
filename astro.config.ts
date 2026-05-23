@@ -42,11 +42,14 @@ export default defineConfig({
       // 未指定なら「最近のページ一覧」を自動表示します（.site の home.page が優先）。
       // homePage: "Home",
 
-      // 配色スキン。既定はライト。ダークにするには上の import 行を
-      //   import themeDefault, { presetDark } from "@cosense-site-kit/theme-default";
-      // に変えて、preset: presetDark を渡します。独自配色は CSS 変数を上書き:
+      // 配色スキン（カラーテーマ）。組み込みは2つ:
+      //   - "light" … 既定（明るい配色・トークン上書きなし）
+      //   - "dark"  … presetDark（Notion 風の暖色を保ったダーク）。このデモでは下で有効化中。
+      // 切り替えは2通り（.site が最優先）:
+      //   (a) Cosense の .site で theme: { skin: "dark" } … ブラウザだけ・再ビルド不要・おすすめ
+      //   (b) ここで preset を渡す（ビルド時の既定）。下の presetDark がその例。
+      // 独自配色にしたいときは CSS 変数を上書き（light をベースに上書きされる）:
       //   preset: { tokens: { "--color-bg": "#191919" }, colorScheme: "dark" }
-      // .site の theme.skin でブラウザから切り替える運用も可能です。
       // preset: presetDark,
     }),
   ],
