@@ -1,7 +1,7 @@
 import { defineCosenseSite } from "@cosense-site-kit/core";
 
 // This repo deploys ITSELF as a live demo, built from the public Cosense
-// project https://scrapbox.io/cosense-site-starter/ and served at
+// project https://scrapbox.io/cosense-theme-default/ and served at
 // https://shinyaoguri.github.io/cosense-theme-default/.
 //
 // After cloning, point it at YOUR site by editing these fields:
@@ -20,7 +20,7 @@ export default defineCosenseSite({
 
   source: {
     type: "cosense",
-    project: "cosense-site-starter",
+    project: "cosense-theme-default",
   },
 
   publish: {

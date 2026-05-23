@@ -8,7 +8,8 @@
     "build": "cosense-site fetch && astro build",
     "preview": "astro preview",
     "fetch": "cosense-site fetch",
-    "validate": "cosense-site validate"
+    "validate": "cosense-site validate",
+    "doctor": "cosense-site doctor"
   },
   "dependencies": {
     "@cosense-site-kit/astro": "^0.1.1",
