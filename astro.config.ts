@@ -13,6 +13,7 @@ export default defineConfig({
 
     themeDefault({
       // フッターの著作者表示（"© <年>" の後ろ）。未指定なら cosense.config.ts の site.title。
+      // 自身のサイトの著作者名を入れてください（例: "Shinya Oguri"）。個人サイトなら自分の名前、法人サイトなら会社名など。
       copyright: "Shinya Oguri",
       // 著作者名をリンクにするときの URL（未指定ならただのテキスト表示）。
       copyrightUrl: "https://github.com/shinyaoguri",
