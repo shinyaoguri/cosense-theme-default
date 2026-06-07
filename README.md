@@ -2,9 +2,10 @@
 
 公開中の [Cosense](https://scrapbox.io)（旧 Scrapbox）プロジェクトを、そのまま静的サイトにして公開するためのスターターテンプレートです。中身は [cosense-site-kit](https://github.com/shinyaoguri/cosense-site-kit) を使った最小構成の Astro サイト + デフォルトテーマ。
 
-- **書くのは Cosense だけ** — `#publish` を付けたページが、そのままサイトのページになります。
+- **書くのは Cosense だけ** — `#publish` を付けたページが、そのままサイトのページになります。Cosense の記法（見出し・装飾・コードブロックのシンタックスハイライト・数式・テーブル・YouTube 埋め込みなど）はそのまま描画されます。
 - **ビルドとデプロイは GitHub Actions が自動実行** — ローカル環境ゼロ、ブラウザだけで公開できます。
 - **見た目はデフォルトテーマ（npm パッケージ）** — リポジトリにテーマ本体は同梱されず、`npm update` で改善を取り込めます。
+- **SEO・共有・検索も自動** — 各ページの OpenGraph / Twitter Card / canonical / JSON-LD、`sitemap.xml` / `robots.txt` / `feed.xml`（RSS）、ファビコン、404 ページ、全文検索が設定なしで付きます。
 
 > 非公式のコミュニティ製ツールです。Cosense およびその運営会社とは関係ありません。
 
@@ -84,10 +85,33 @@ source: {
 
 ## Cosense 側の準備（最低限）
 
-サイトに「どのページを・どう出すか」は Cosense 側で決めます。
+サイトに「どのページを・どう出すか」は Cosense 側で決めます。コードを触らず、タグと `.site` ページ（後述）だけで完結します。
 
 - **公開したいページに `#publish` を付ける** — これが公開スイッチです。付いていないページはサイトに出ません（既定は「全ページ非公開」で、1 ページずつ opt-in する設計）。
 - **下書きは `#draft`** — `#publish` が付いていても除外されます。
+
+### ページに付けられるタグ
+
+タグはページ本文のどこに書いても構いません（他のタグと同じ行に並べても OK）。
+
+| タグ | 効果 |
+|---|---|
+| `#publish` | ページを公開対象に含める（公開スイッチ） |
+| `#draft` / `#private` / `#internal` | `#publish` があっても除外する |
+| `#post` | `/posts` フィードとホームの「Recent posts」に表示（タグ名は `.site` で変更可） |
+| `#slug/my-page` | URL スラッグを明示指定（無指定ならタイトルから生成） |
+| `#published/2024-04-01` | 公開日を明示指定（無指定なら Cosense の作成日） |
+| `#updated/2026-06-06` | 更新日を明示指定（無指定なら Cosense の更新日） |
+| `#no-date` | このページの公開日・更新日を**表示しない**（About など日付不要なページ向け） |
+| `#template/profile` | このページを別テンプレートで描画（後述の[テンプレート](#テンプレートページごとの見た目)） |
+
+> **`#publish` と `#published/…` は別物です。** `#publish`（スラッシュ無し）はページを公開する**フラグ**、`#published/YYYY-MM-DD`（`ed` 付き）は**公開日**の指定です。
+
+公開日・更新日の補足:
+
+- 日付フォーマットは厳格な `YYYY-MM-DD`（ゼロ埋め必須）。不正な日付は無視され、警告を出して Cosense のタイムスタンプにフォールバックします（`npm run doctor` で確認できます）。
+- `#no-date` を付けても日付データ自体は残るので、一覧の並び順・RSS の `pubDate`・sitemap の `lastmod` には引き続き使われます（消えるのは画面表示だけ）。
+
 - **`.site` ページで構造を宣言**（任意・推奨）— タイトル `.site` のページを作り、`code:site.yaml` ブロックを 1 つ置くと、ナビ・ホーム・記事一覧などを宣言できます:
 
 ```
@@ -99,9 +123,32 @@ code:site.yaml
  nav:
    - { label: "About",  page: "About" }
    - { label: "GitHub", href: "https://github.com/you" }
+ posts:
+   tag: "post"
+   limit: 10
+ featured:
+   - "おすすめページ"
+ redirects:
+   old-slug: new-slug
+ theme:
+   skin: dark
 ```
 
-`.site` が無くても動きます（`/` に最近のページ一覧が出ます）。タグや `.site` YAML の全フィールドは [cosense-site-kit のドキュメント](https://github.com/shinyaoguri/cosense-site-kit) を参照してください。
+`code:site.yaml` で使える主なフィールド:
+
+| フィールド | 説明 |
+|---|---|
+| `home.page` | ホーム本文として描画する Cosense ページ。未指定なら「最近のページ一覧」 |
+| `nav[]` | ヘッダーのナビ。`{label, page}`（内部リンク）または `{label, href}`（外部 URL） |
+| `posts.tag` / `posts.limit` | `/posts` とホームの「Recent posts」に出すタグ名と表示件数 |
+| `featured[]` | ホームの注目ページブロック（Cosense ページタイトルの配列） |
+| `redirects` | 旧 slug → 新 slug の明示リダイレクト（出したいものだけ書く） |
+| `theme.skin` | 配色スキン（後述の[カラーテーマ](#カラーテーマスキン)）。`astro.config.ts` の `preset` より優先 |
+| `templates` | ページタイトル → テンプレート名のマッピング（後述の[テンプレート](#テンプレートページごとの見た目)） |
+
+キー名を打ち間違えると（例: `nav` を `navigation` と書く）ビルド時に「did you mean …?」の警告が出るので、`npm run doctor` で気づけます。
+
+`.site` が無くても動きます（`/` に最近のページ一覧が出ます）。全フィールドの詳細は [cosense-site-kit のドキュメント](https://github.com/shinyaoguri/cosense-site-kit) を参照してください。
 
 ---
 
@@ -137,6 +184,32 @@ code:site.yaml
    ```
 
 `light` / `dark` 以外の名前付きスキンを `.site` から選べるようにするには、テーマ本体の `PRESETS` レジストリに追加します（詳しくは [cosense-site-kit のドキュメント](https://github.com/shinyaoguri/cosense-site-kit)）。
+
+---
+
+## テンプレート（ページごとの見た目）
+
+ページの URL（`/<slug>`）はそのままに、**そのページの描画だけ**を切り替えられます。デフォルトテーマが用意しているテンプレート:
+
+| テンプレート | 用途 |
+|---|---|
+| `page` | 通常ページ（既定）。タイトル + タグチップ + 本文 + backlinks |
+| `profile` | プロフィール系。中央寄せのヒーロー + 本文（タグチップなし） |
+| `collection` | YAML データから一覧を組み立てる。職歴・業績・作品集・リンク集など |
+
+指定方法は2通り（タグが優先、無ければ `.site` のマッピング、どちらも無ければ `page`）:
+
+1. **ページ本文にタグ** — `#template/profile` のように付けます。
+2. **`.site` の `templates:`** — `code:site.yaml` にページタイトル → テンプレート名で一括指定:
+
+   ```
+   code:site.yaml
+    templates:
+      "About Me": profile
+      "Publications": collection
+   ```
+
+`collection` はページ本文の最初の `code:foo.yaml` ブロックを「セクション付きの一覧」として描画します。各項目は持っているフィールド（`label` / `period` / `title` / `authors` / `description` / `url` / `tags` など）に応じて整形され、`tags` があればフィルタチップも自動で付きます。CV や論文リストをブラウザだけで作れます。
 
 ---
 
@@ -219,6 +292,7 @@ git push
 - **ビルドは成功するのにページが 404** — `site.base` がリポジトリ名とズレている可能性大。`"/<リポジトリ名>"`（先頭スラッシュあり）になっているか確認してください。
 - **CSS が当たらない / リンクが壊れる** — これも `site.base` のズレが原因のことが多いです。
 - **検索が出ない（ローカル）** — 仕様です。`npm run build` → `npm run preview` で確認してください。
+- **ナビ / posts が出ない** — `.site` の `code:site.yaml` のキー名やインデントを確認。打ち間違い（`nav` → `navigation`）やインデントずれはビルド時に警告が出るので、`npm run doctor` でログを確認してください。
 - **Actions が失敗（赤）** — Actions のログを開き `cosense-site fetch` の行を確認。`404` ならプロジェクト名か Cosense の公開設定の問題です。
 
 ---
