@@ -26,20 +26,29 @@ jobs:
         with:
           node-version: 24
 
+      # Unique key per run: actions/cache never re-saves on an exact-key hit,
+      # so a fixed key would freeze the cache and defeat the differential fetch.
       - name: Restore Cosense cache
         uses: actions/cache@v5
         with:
           path: .cosense-cache
-          key: cosense-cache-${{ github.ref }}
+          key: cosense-cache-${{ github.run_id }}
           restore-keys: |
             cosense-cache-
 
       - name: Configure Pages
+        id: pages
         uses: actions/configure-pages@v6
 
       - run: npm install
       - run: npx cosense-site fetch
+      # base_path / origin from configure-pages feed site.base / site.baseUrl
+      # in cosense.config.ts, so the site works at any GitHub Pages URL (user
+      # or project page) without editing the config.
       - run: npx astro build
+        env:
+          PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          PAGES_ORIGIN: ${{ steps.pages.outputs.origin }}
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5

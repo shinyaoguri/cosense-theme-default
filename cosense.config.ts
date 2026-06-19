@@ -4,17 +4,21 @@ import { defineCosenseSite } from "@cosense-site-kit/core";
 // project https://scrapbox.io/cosense-theme-default/ and served at
 // https://shinyaoguri.github.io/cosense-theme-default/.
 //
-// After cloning, point it at YOUR site by editing these fields:
+// After cloning, point it at YOUR site by editing:
 //   1. source.project — your PUBLIC Cosense project name.
-//   2. site.baseUrl   — your GitHub Pages origin (https://USERNAME.github.io).
-//   3. site.base      — "/REPO_NAME" for a project page, or "/" for a user/org page.
-//   (site.title / description are the demo's; change them too.)
+//   2. site.title / description — the demo's; change them too.
+//
+// You do NOT need to touch baseUrl / base for GitHub Pages: the deploy
+// workflow injects the correct origin and subpath (PAGES_ORIGIN /
+// PAGES_BASE_PATH, from actions/configure-pages), which handles both
+// user/org pages (served at "/") and project pages (served at "/REPO")
+// automatically. The literals below are only fallbacks for local builds.
 export default defineCosenseSite({
   site: {
     title: "cosense-theme-default",
     description: "Live demo of the cosense-site-kit default theme",
-    baseUrl: "https://shinyaoguri.github.io",
-    base: "/cosense-theme-default",
+    baseUrl: process.env.PAGES_ORIGIN || "https://shinyaoguri.github.io",
+    base: process.env.PAGES_BASE_PATH || "/cosense-theme-default",
     lang: "ja",
   },
 
