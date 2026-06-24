@@ -29,7 +29,7 @@ jobs:
       # Unique key per run: actions/cache never re-saves on an exact-key hit,
       # so a fixed key would freeze the cache and defeat the differential fetch.
       - name: Restore Cosense cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: .cosense-cache
           key: cosense-cache-${{ github.run_id }}
