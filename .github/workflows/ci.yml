@@ -21,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
 
@@ -29,7 +29,7 @@ jobs:
       # デプロイ用キャッシュを上書きしないため。miss してもフル fetch に
       # フォールバックするだけ。
       - name: Restore Cosense cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: .cosense-cache
           key: cosense-cache-${{ github.run_id }}
