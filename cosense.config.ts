@@ -1,30 +1,46 @@
 import { defineCosenseSite } from "@cosense-site-kit/core";
 
-// This repo deploys ITSELF as a live demo, built from the public Cosense
-// project https://scrapbox.io/cosense-theme-default/ and served at
-// https://shinyaoguri.github.io/cosense-theme-default/.
+// Per-site values are NOT hard-coded here, so a copy of this template needs
+// no code edits to be pointed at your own site:
 //
-// After cloning, point it at YOUR site by editing:
-//   1. source.project — your PUBLIC Cosense project name.
-//   2. site.title / description — the demo's; change them too.
+//   * source.project — your PUBLIC Cosense project name. Set it as a GitHub
+//     repository *variable* named COSENSE_PROJECT
+//     (Settings → Secrets and variables → Actions → Variables). Locally, run
+//     e.g. `COSENSE_PROJECT=my-notes npm run dev`. Left unset, the build stops
+//     with a message instead of silently building someone else's site.
+//   * site.baseUrl / site.base — injected by the deploy workflow
+//     (PAGES_ORIGIN / PAGES_BASE_PATH, from actions/configure-pages), which
+//     handles both user/org pages (served at "/") and project pages (served
+//     at "/REPO"). The literals below are only fallbacks for local builds.
+//   * site.title — defaults to the repository name; edit it to taste.
 //
-// You do NOT need to touch baseUrl / base for GitHub Pages: the deploy
-// workflow injects the correct origin and subpath (PAGES_ORIGIN /
-// PAGES_BASE_PATH, from actions/configure-pages), which handles both
-// user/org pages (served at "/") and project pages (served at "/REPO")
-// automatically. The literals below are only fallbacks for local builds.
+// The upstream demo (https://shinyaoguri.github.io/cosense-theme-default/)
+// builds from the public Cosense project https://scrapbox.io/cosense-theme-default/
+// by setting COSENSE_PROJECT=cosense-theme-default as its repository variable.
+const project = process.env.COSENSE_PROJECT;
+if (!project) {
+  throw new Error(
+    "COSENSE_PROJECT is not set. Set your public Cosense project name as the " +
+      "COSENSE_PROJECT repository variable (Settings → Secrets and variables → " +
+      "Actions → Variables), or run locally with COSENSE_PROJECT=<name>.",
+  );
+}
+
+// "owner/repo" is provided by GitHub Actions; local builds fall back to a generic name.
+const repoName = process.env.GITHUB_REPOSITORY?.split("/")[1];
+
 export default defineCosenseSite({
   site: {
-    title: "cosense-theme-default",
-    description: "Live demo of the cosense-site-kit default theme",
-    baseUrl: process.env.PAGES_ORIGIN || "https://shinyaoguri.github.io",
-    base: process.env.PAGES_BASE_PATH || "/cosense-theme-default",
+    title: repoName || "My Cosense Site",
+    description: "A site published from Cosense",
+    baseUrl: process.env.PAGES_ORIGIN || "http://localhost:4321",
+    base: process.env.PAGES_BASE_PATH || "/",
     lang: "ja",
   },
 
   source: {
     type: "cosense",
-    project: "cosense-theme-default",
+    project,
   },
 
   publish: {

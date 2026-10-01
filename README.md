@@ -37,32 +37,19 @@
    - リポジトリ名を **`<ユーザー名>.github.io`** にすると、サブパスなしの `https://<ユーザー名>.github.io/` で公開できます。
 3. 公開範囲は **Public** を選びます（GitHub Pages を無料で使うには Public が必要。Private は GitHub Pro / Team が要ります）。
 
-### 2. `cosense.config.ts` を自分のサイトに向ける
+### 2. 自分の Cosense プロジェクトを指定する（コードの編集は不要）
 
-作成したリポジトリで **`cosense.config.ts`** を開きます（ファイル右上の鉛筆アイコンでブラウザ上で編集できます）。次の **3か所** を書き換えます。
+作成したリポジトリで **Settings → Secrets and variables → Actions → Variables タブ → 「New repository variable」** を開き、次を 1 つ登録します。
 
-| 項目 | 何を書くか | 例 |
+| Name | Value | 例 |
 |---|---|---|
-| `source.project` | あなたの Cosense プロジェクト名（URL `scrapbox.io/<ここ>/` の部分） | `"my-notes"` |
-| `site.baseUrl` | あなたの GitHub Pages のオリジン | `"https://taro.github.io"` |
-| `site.base` | `/` + リポジトリ名。`<ユーザー名>.github.io` リポジトリなら `"/"` | `"/my-notes"` |
+| `COSENSE_PROJECT` | あなたの Cosense プロジェクト名（URL `scrapbox.io/<ここ>/` の部分） | `my-notes` |
 
-`site.title` / `site.description` はデモのままなので、自分のサイト名に変えておきましょう。書き換えたら下部の **「Commit changes」** で保存します。
+これだけです。**未設定のままだとビルドが「`COSENSE_PROJECT` が未設定」というメッセージで止まります**（他人のサイトを黙ってビルドしないための仕様）。以下は自動で決まるので編集しなくて構いません。
 
-```ts
-// cosense.config.ts（書き換える部分の例）
-site: {
-  title: "My Notes",
-  description: "私の公開ノート",
-  baseUrl: "https://taro.github.io",
-  base: "/my-notes",
-  lang: "ja",
-},
-source: {
-  type: "cosense",
-  project: "my-notes",
-},
-```
+- 公開 URL（`site.baseUrl` / `site.base`）— GitHub Pages の設定から自動で入ります。
+- サイト名（`site.title`）— 既定はリポジトリ名。変えたいときだけ `cosense.config.ts` の `title` を書き換えます。
+- フッターの著作者表示 — リポジトリの所有者（ユーザー名 / Organization 名）が自動で入ります。本名などにしたいときだけ `astro.config.ts` の `copyright` を文字列で上書きします。
 
 ### 3. GitHub Pages を有効化する
 
@@ -231,7 +218,8 @@ cd <リポジトリ名>
 # 2. 依存をインストール
 npm install
 
-# 3. （まだなら）cosense.config.ts の3項目を編集 — 上の「A. の 2.」と同じ
+# 3. 自分の Cosense プロジェクト名を環境変数で渡す（この例は macOS / Linux。以降のコマンドも同じシェルで）
+export COSENSE_PROJECT=<Cosenseプロジェクト名>
 
 # 4. Cosense からページを取得（.cosense-cache/ に保存される）
 npm run fetch
@@ -240,7 +228,7 @@ npm run fetch
 npm run dev
 ```
 
-開発サーバーは **`http://localhost:4321/<site.base>/`** で開きます（`site.base` が `/my-notes` なら `http://localhost:4321/my-notes/`）。起動時のログにも URL が出ます。
+開発サーバーは **`http://localhost:4321/`** で開きます。起動時のログにも URL が出ます。
 
 押さえておくポイント:
 
@@ -277,9 +265,9 @@ git push
 
 | ファイル | 役割 |
 |---|---|
-| `cosense.config.ts` | データソース（Cosense プロジェクト）、公開ルール（`#publish` 等のタグ）、slug 戦略、公開先。**最初に編集する所。** |
+| `cosense.config.ts` | データソース（Cosense プロジェクトは環境変数 `COSENSE_PROJECT` から）、公開ルール（`#publish` 等のタグ）、slug 戦略、公開先。 |
 | `astro.config.ts` | テーマのオプション（`themeDefault({ nav, copyright, preset, search, ... })`）や他の Astro インテグレーションの追加。 |
-| `.github/workflows/build.yml` | 取得 → ビルド → GitHub Pages デプロイの自動化。cron は `cosense.config.ts` の `deploy.schedule` 由来。 |
+| `.github/workflows/build.yml` | 取得 → ビルド → GitHub Pages デプロイの自動化。cron は `cosense.config.ts` の `deploy.schedule` 由来。`COSENSE_PROJECT` 変数をここで渡しています。 |
 | Cosense の `.site` ページ | ナビ / ホーム / 記事一覧などのサイト構造（ブラウザだけで変更可）。 |
 
 テーマのオプション、`.site` の全フィールド、ページごとの見た目を変えるテンプレート機能などの詳細は **[cosense-site-kit のドキュメント](https://github.com/shinyaoguri/cosense-site-kit)** にまとまっています。
@@ -288,9 +276,10 @@ git push
 
 ## うまくいかないとき
 
-- **サイトが空 / ページが出ない** — 公開したいページに `#publish` が付いていますか？ `cosense.config.ts` の `source.project` がプロジェクト名と一致していますか（`https://scrapbox.io/<その名前>/` が開けるか確認）。`npm run doctor` で診断できます。
-- **ビルドは成功するのにページが 404** — `site.base` がリポジトリ名とズレている可能性大。`"/<リポジトリ名>"`（先頭スラッシュあり）になっているか確認してください。
-- **CSS が当たらない / リンクが壊れる** — これも `site.base` のズレが原因のことが多いです。
+- **サイトが空 / ページが出ない** — 公開したいページに `#publish` が付いていますか？ リポジトリ変数 `COSENSE_PROJECT`（ローカルでは環境変数）がプロジェクト名と一致していますか（`https://scrapbox.io/<その名前>/` が開けるか確認）。`npm run doctor` で診断できます。
+- **ビルドが「COSENSE_PROJECT が未設定」で止まる** — 上の「A. の 2.」のリポジトリ変数を登録してください。
+- **ビルドは成功するのにページが 404** — GitHub Pages の公開元が「GitHub Actions」になっているか（A. の 3.）、Pages の URL とアクセスしている URL が一致しているかを確認してください。
+- **CSS が当たらない / リンクが壊れる** — これも公開 URL のズレが原因のことが多いです（`npm run dev` / `npm run build` をローカルで動かしたときは `/` 直下を前提にしています）。
 - **検索が出ない（ローカル）** — 仕様です。`npm run build` → `npm run preview` で確認してください。
 - **ナビ / posts が出ない** — `.site` の `code:site.yaml` のキー名やインデントを確認。打ち間違い（`nav` → `navigation`）やインデントずれはビルド時に警告が出るので、`npm run doctor` でログを確認してください。
 - **Actions が失敗（赤）** — Actions のログを開き `cosense-site fetch` の行を確認。`404` ならプロジェクト名か Cosense の公開設定の問題です。
