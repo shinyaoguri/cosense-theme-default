@@ -19,6 +19,10 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # cosense.config.ts が読む。Settings → Secrets and variables → Actions →
+      # Variables に COSENSE_PROJECT (公開 Cosense プロジェクト名) を登録する。
+      COSENSE_PROJECT: ${{ vars.COSENSE_PROJECT }}
     steps:
       - uses: actions/checkout@v7
 
