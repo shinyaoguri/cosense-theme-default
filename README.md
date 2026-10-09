@@ -4,7 +4,7 @@
 
 - **書くのは Cosense だけ** — `#publish` を付けたページが、そのままサイトのページになります。Cosense の記法（見出し・装飾・コードブロックのシンタックスハイライト・数式・テーブル・YouTube 埋め込みなど）はそのまま描画されます。
 - **ビルドとデプロイは GitHub Actions が自動実行** — ローカル環境ゼロ、ブラウザだけで公開できます。
-- **見た目はデフォルトテーマ（npm パッケージ）** — リポジトリにテーマ本体は同梱されず、`npm update` で改善を取り込めます。
+- **見た目はデフォルトテーマ（npm パッケージ）** — リポジトリにテーマ本体は同梱されず、改善は Dependabot の PR で自動的に取り込まれます。
 - **SEO・共有・検索も自動** — 各ページの OpenGraph / Twitter Card / canonical / JSON-LD、`sitemap.xml` / `robots.txt` / `feed.xml`（RSS）、ファビコン、404 ページ、全文検索が設定なしで付きます。
 
 > 非公式のコミュニティ製ツールです。Cosense およびその運営会社とは関係ありません。
@@ -259,6 +259,12 @@ git commit -m "configure my site"
 git push
 ```
 
+### 依存の自動更新
+
+cosense-site-kit（テーマ・CLI）や Astro の新しいバージョンは、Dependabot が毎日確認して PR を立てます。PR では CI（取得 → `doctor` → ビルド）が走り、**通ったものは自動でマージ**され、次回の定時ビルドでサイトに反映されます。CI が失敗した PR はマージされずに残るので、内容を確認してください。
+
+自動マージを止めたい場合は `.github/workflows/ci.yml` の `automerge` job を削除してください（PR は引き続き立ちます）。
+
 ---
 
 ## 設定ファイル早見表
@@ -268,6 +274,7 @@ git push
 | `cosense.config.ts` | データソース（Cosense プロジェクトは環境変数 `COSENSE_PROJECT` から）、公開ルール（`#publish` 等のタグ）、slug 戦略、公開先。 |
 | `astro.config.ts` | テーマのオプション（`themeDefault({ nav, copyright, preset, search, ... })`）や他の Astro インテグレーションの追加。 |
 | `.github/workflows/build.yml` | 取得 → ビルド → GitHub Pages デプロイの自動化。cron は `cosense.config.ts` の `deploy.schedule` 由来。`COSENSE_PROJECT` 変数をここで渡しています。 |
+| `.github/workflows/ci.yml` / `.github/dependabot.yml` | PR ごとの検証と、依存更新 PR（Dependabot）の自動マージ。 |
 | Cosense の `.site` ページ | ナビ / ホーム / 記事一覧などのサイト構造（ブラウザだけで変更可）。 |
 
 テーマのオプション、`.site` の全フィールド、ページごとの見た目を変えるテンプレート機能などの詳細は **[cosense-site-kit のドキュメント](https://github.com/shinyaoguri/cosense-site-kit)** にまとまっています。
