@@ -51,3 +51,21 @@ jobs:
       - run: npx cosense-site doctor
 
       - run: npx astro build
+
+  # Dependabot の PR は check が通れば自動でマージする (失敗した PR は残るので
+  # 人が見る)。マージ後は build.yml の定時実行で公開サイトに反映される。
+  # `gh pr merge --auto` はリポ設定 (auto-merge 許可・必須チェック) が要り、
+  # テンプレートから作ったリポには引き継がれないため、needs: check で
+  # ゲートしたうえで直接マージする。止めたいときはこの job を消す。
+  automerge:
+    needs: check
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - run: gh pr merge --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
